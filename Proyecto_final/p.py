@@ -184,13 +184,17 @@ def disparar_usuario(X,Y):
 #funcion para que la maquina dispare, se verifica si la maquina fue la ganadora
 def disparo_maquina():
     global mat
+    global stats
+    global nombre
     a = random.randrange(0,8) 
     b = random.randrange(0,8) 
     try:
         if tablero_usuario.recibir_disparo(a,b) == "Game Over":
             pf = tablero_maquina.aciertos // tablero_maquina.total_fallos
             anuncio.config(text = "gano la maquina \n su puntaje fue:  " + str(pf) + "\n la cantidad de disparos fue: " + str(tablero_maquina.total_fallos) + "\n su puntaje por aciertos fue: " + str(tablero_maquina.aciertos))
-            #tablero_usuario.calcular_puntaje
+            stats.append[nombre.get(),pf]
+            nombre.place(x = 300, y = 650)
+            anuncio.place(x = 500,y = 600)
         else:
             if tablero_usuario.mat[a][b] != 0 and tablero_usuario.mat[a][b] < 6:
                 m = "la maquina acerto, le toca" 
@@ -586,6 +590,12 @@ barco_5d.place(x = 15 ,y = 480)
 barco_5d.place_forget() 
 
 
+#nombre del jugador
+nombre = Entry(ventana) 
+nombre.place(x = 15 ,y = 80) 
+nombre.place_forget() 
+
+
 
 #imagenes usadas
 
@@ -709,7 +719,7 @@ menu_principalS.config(background = color1)
 menu_principalS.place_forget()
 
 #boton para inicializar los barcos visualmente y el juego
-iniciarbarcos = Button(ventana, text="Dibujar barcos e iniciar juego", font = (6),
+iniciarbarcos = Button(ventana, text="Dibujar barcos \n iniciar juego", font = (6),
                        fg = "white", width = 17,height = 2, borderwidth = 2, relief = "groove",
                        command = inicializar_barcos)
 iniciarbarcos.place(x = 1 , y = 1)
