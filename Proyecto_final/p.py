@@ -6,6 +6,10 @@ from functools import partial
 from json import * 
 
 
+
+
+#esta funcion inicializa todos los barcos antes programados haciendo uso
+#de la clase tablero y la clase barco
 def inicializar_barcos():
     global tablero_usuario
     global tablero_maquina
@@ -44,24 +48,29 @@ def inicializar_barcos():
     salida_tamano_usuario = tablero_usuario.verificar_tablero_tamano()
     tablero_usuario.mostrar_matriz()
 
-    if salida_cruce_usuario == 1 :
-        print("error, se cruzan los barcos")
-    elif salida_tamano_usuario == 1:
-        print("error, se sale de la matriz")
-    else:
-        # si el usuario no cometio errores, posiciona maquina
-        b = random.randrange(0,2)   
-        tablero_maquina = Tablero(matrices_maquina[b][0],matrices_maquina[b][1],matrices_maquina[b][2],matrices_maquina[b][3],matrices_maquina[b][4])
-        tablero_maquina.verificar_tablero_cruce()
-        actualizar_vista()        
-        anuncio.config(text = "presione iniciar,juego")
-        iniciar_juego()
+    #verifica si el usuario cometio errores a la hora de posicionar los barcos
+    
+    try:
+
+        if salida_cruce_usuario == 1 :
+            print("error, se cruzan los barcos")
+        elif salida_tamano_usuario == 1:
+            print("error, se sale de la matriz")
+        else:
+            # si el usuario no cometio errores, posiciona maquina
+            b = random.randrange(0,2)   
+            tablero_maquina = Tablero(matrices_maquina[b][0],matrices_maquina[b][1],matrices_maquina[b][2],matrices_maquina[b][3],matrices_maquina[b][4])
+            tablero_maquina.verificar_tablero_cruce()
+            actualizar_vista()        
+            anuncio.config(text = "presione iniciar,juego")
+            iniciar_juego()
+    except:
+        anuncio.config(text = "por favor, rellene todas las casillas")
 
 
 
 
-
-
+#esta funcion elimina los botones y cambia el estado del juego a iniciado
 def iniciar_juego():
     global estaddio
     global mat
@@ -87,14 +96,17 @@ def iniciar_juego():
     guardar_barcos.place_forget()
     reiniciar.place(x = 20, y = 600)
     anuncio.config(text = "su turno, dispare")
+    titulo.config(text = "fase de batalla")
 
+
+    #este ciclo cambia los comandos de los botones para que sean capaces de disparar
     for a in range(8):
         for b in range(8):
             mat2[a][b].config(command = partial(disparar_usuario, a,b))
 
 
 
-
+    #reinicio del tablero visualmente al momento antes de presionar iniciar juego
 def reiniciar():
     global tablero_usuario
     global tablero_maquina
@@ -110,7 +122,7 @@ def reiniciar():
 
 
 
-#modificar tablero
+#modificar tablero visual haciendo refrencia a las matrices modificadas de la clase tablero
 def actualizar_vista():
     global mat 
     global mat2
@@ -142,14 +154,17 @@ def actualizar_vista():
     
 
 
-
+#comando de los botones luego de iniciar el juego, realiza un disparo y verifica si fue el ganador, de lo
+#contrario la maquina realiza un disparo en respuesta
 def disparar_usuario(X,Y):
     global mat2
     if tablero_maquina.recibir_disparo(X,Y) == "Game Over":
         pf = tablero_maquina.aciertos // tablero_maquina.total_fallos
         anuncio.config(text = "Jugador Gano a la maquina \n su puntaje fue: " + str(pf)+ "\n la cantidad de disparos fallidos fue: " + str(tablero_maquina.total_fallos) + "\n su puntaje por aciertos fue: " + str(tablero_maquina.aciertos))
         #tablero_usuario.calcular_puntaje
-
+        for a in range(8):
+            for b in range(8):
+                mat2[a][b].config(command = paso())
 
         
     else:
@@ -166,7 +181,7 @@ def disparar_usuario(X,Y):
 
 
 
-
+#funcion para que la maquina dispare, se verifica si la maquina fue la ganadora
 def disparo_maquina():
     global mat
     a = random.randrange(0,8) 
@@ -174,7 +189,7 @@ def disparo_maquina():
     try:
         if tablero_usuario.recibir_disparo(a,b) == "Game Over":
             pf = tablero_maquina.aciertos // tablero_maquina.total_fallos
-            anuncio.config(text = "gano la maquina \n su puntaje fue:  " + str(pf) + "\n la cantidad de disparos fallidos fue: " + str(tablero_maquina.total_fallos) + "\n su puntaje por aciertos fue: " + str(tablero_maquina.aciertos))
+            anuncio.config(text = "gano la maquina \n su puntaje fue:  " + str(pf) + "\n la cantidad de disparos fue: " + str(tablero_maquina.total_fallos) + "\n su puntaje por aciertos fue: " + str(tablero_maquina.aciertos))
             #tablero_usuario.calcular_puntaje
         else:
             if tablero_usuario.mat[a][b] != 0 and tablero_usuario.mat[a][b] < 6:
@@ -187,13 +202,13 @@ def disparo_maquina():
         print(":p") 
 
 
-
+#funcion para neutralizar botones
 def paso():
     pass
 
 
 
-
+#funcion para cargar tablero desde el archivo externo
 def cargar_tablero():
     global tablero_usuario
     try:
@@ -202,10 +217,10 @@ def cargar_tablero():
         x.close()
     except:
         anuncio.config(text = "No se ha guardado ningun configuracion de barcos") 
+        anuncio.place(x = 400, y =600 )
 
 
-
-
+#funcion para guardar el tablero en el arquivo externo
 def guardar_tablero():
     global tablero_usuario
     global guardados
@@ -215,12 +230,12 @@ def guardar_tablero():
         x.close()
     except:
         anuncio.config(text = "Aun no existe ninguna posicion en el tablero que guardar") 
+        anuncio.place(x = 400, y =600 )
 
 
 
 
-
-#comandos mapa
+#inicia el tablero visualmente, tanto el enemigo como el del usuario
 def iniciartab():
     global mat
     global mat2
@@ -261,7 +276,7 @@ def iniciartab():
         h = 600
     
 
-
+#posiciona los botones y labels , asi como el resto de componentes visuales
     xyp.place(x = 15, y = 110)
     barco_1x.place(x = 15 ,y = 133)  
     barco_2x.place(x = 15 ,y = 213)  
@@ -285,7 +300,8 @@ def iniciartab():
     tablero_maquinanom.place(x = 750 , y = 100)
     cargar_barcos.place(x = 20, y = 500)
     guardar_barcos.place(x = 20, y = 550)
-
+    estadisticas.place_forget()
+#esconde la mayor parte de objetos visuales 
 def quitartab():
     global mat
     global mat2
@@ -328,6 +344,7 @@ def quitartab():
     
 
 #commandos menu 
+#va hacia atras en el mismo menu
 def atras():
     inicio.place(x=400 , y=300)
     dificultad.place(x=400 , y=375)
@@ -337,7 +354,7 @@ def atras():
     normal.place_forget()
     dificil.place_forget()
 
-
+# muestra la primera pantalla 
 def alPrincipal():
     global matriz_machine
     global matriz_barcos
@@ -346,6 +363,7 @@ def alPrincipal():
     inicio.place(x=400 , y=300)
     dificultad.place(x=400 , y=375)
     salir.place(x=400 , y=450)
+    estadisticas.place(x = 50, y = 300)
     titulo.config(text = "BATALLA NAVAL")
     menu_principalS.place_forget()
     quitartab()
@@ -353,6 +371,7 @@ def alPrincipal():
     matriz_barcos = []
 
 
+#inicia el tablero y borra la pantalla de bienvenida
 def iniciar():
     global matriz_usuario
     global matriz_machine
@@ -365,7 +384,7 @@ def iniciar():
     iniciartab()
 
     
-
+    #cambios de dificultad, no implementados debido a la falta de tiempo
 def dificultad():
     inicio.place_forget()
     dificultad.place_forget()
@@ -412,6 +431,8 @@ def dificil():
     dific.config(text = "Dificultad dificil")
 
 
+
+#cierra la ventana y termina el programa
 def salir():
     ventana.destroy()
 
@@ -427,13 +448,21 @@ def salir():
 
 #variables
 dificiultad = "normal"
+#estado de la partida
 estaddio = 0
+#inicializacion de matrices visuales
 mat = []
 mat2 = []
+
+#mejores jugadores
+
+stats = []
+
+#inicializacion de variables para los objetos tablero
 tablero_usuario = 0
 tablero_maquina = 0
 
-
+#tableros preprogramados para la maquina
 matrices_maquina = []
 
 barco1_e1 = Barco(1,0,0,2)
@@ -464,6 +493,8 @@ matrices_maquina.append(matriz_maquina1)
 matrices_maquina.append(matriz_maquina2)
 matrices_maquina.append(matriz_maquina3)
 
+
+#color de los botones y detalles
 color1 = "#d1a956"
 
 
@@ -487,7 +518,7 @@ ventana.title("Batalla naval")
 ventana.config(background = "white" )
 ventana.resizable(0,0)
 
-
+#imputs de las coordenadas para los barcos asi como la direccion
 barco_1x = Entry(ventana,borderwidth = 3, width = 2) 
 barco_1x.place(x = 15 ,y = 80) 
 barco_1x.place_forget() 
@@ -556,7 +587,7 @@ barco_5d.place_forget()
 
 
 
-#imagenes
+#imagenes usadas
 
 barco = PhotoImage(file = "barco.png")
 agua = PhotoImage(file = "oceano.png")
@@ -567,31 +598,35 @@ fallo = PhotoImage(file = "fallo.png")
 
 
 #compedio de textos 
+#titulo inicial, cambia segun el estado de la partida
 titulo = Label(ventana, text = "BATALLA NAVAL", font = ("Imperfecta Rough",30),
              fg = color1 )
 titulo.pack()
 titulo.config(background = "white", )
 
+#indicador de dificultad
 dific = Label(ventana, text = "Dificultad normal", font = ("Imperfecta Rough",10),
               fg = color1)
 dific.place(x=980, y=1)
 dific.config(background = "white")
 
-ver = Label(ventana, text="ver 0.36")
+#version del juego
+ver = Label(ventana, text="ver 1.00")
 ver.place(x=0,y=680)
 
+#el texto sobre los imputs en el panel de barco
 xyp = Label(ventana, text = "X    Y    D", font = (10))
 xyp.config(background = "white")
 xyp.place(x = 1, y = 1)
 xyp.place_forget()
 
-
+#tablon de anuncios en la parte baja
 anuncio = Label (ventana, text = "", font = 10, fg = color1)
 anuncio.config(background = "white")
 anuncio.place(x = 0 , y = 0)
 anuncio.place_forget()
 
-
+#indicadores de tablero
 tablero_usuarionom = Label (ventana, text = "Tu tablero", font = 10, fg = color1)
 tablero_usuarionom.config(background = "white")
 tablero_usuarionom.place(x = 0 , y = 0)
@@ -602,8 +637,11 @@ tablero_maquinanom.config(background = "white")
 tablero_maquinanom.place(x = 0 , y = 0)
 tablero_maquinanom.place_forget()
 
+#estadisticas
 
-
+estadisticas = Label(ventana, text = stats, font = 15, fg = color1)
+estadisticas.config(background = "white")
+estadisticas.place(x = 50, y = 300)
 
 
 
@@ -612,38 +650,41 @@ tablero_maquinanom.place_forget()
 
 
 #compedio de botones
+#boton de inicio
 inicio = Button(ventana, text = "Iniciar juego",font = ("Imperfecta Rough",20),
                 fg = "white", width = 19,borderwidth = 3, relief = "groove",
                 command = iniciar)
 inicio.place(x=400 , y=300)
 inicio.config(background = color1 )
 
-
+#boton para cambiar la dificultad
 dificultad = Button(ventana, text = "Dificultad",font = ("Imperfecta Rough",20),
                     fg = "white", width = 19, borderwidth = 3, relief = "groove"
                     ,command = dificultad)
 dificultad.place(x=400 , y=375)
 dificultad.config(background = color1)
 
+#boton para finalizar el juego
 salir = Button(ventana, text = "Salir del juego",font = ("Imperfecta Rough",20),
                fg = "white", width = 19, borderwidth = 3, relief = "groove",
                command = salir)
 salir.place(x=400 , y=450)
 salir.config(background = color1)
-
+#boton para volver en el menu
 atras = Button(ventana, text = "Atras",font = ("Imperfecta Rough",20),
                fg = "white", width = 19, borderwidth = 3, relief = "groove",
                command = atras)
 atras.place(x=400 , y=525)
 atras.config(background = color1)
 atras.place_forget()
-
+#botones para cambiar la dificultas, wip
 facil = Button(ventana, text = "Facil",font = ("Imperfecta Rough",20),
                fg = "white", width = 19, borderwidth = 3, relief = "groove",
                command = facil)
 facil.place(x=400 , y=300)
 facil.config(background = color1)
 facil.place_forget()
+
 
 normal = Button(ventana, text = "Normal",font = ("Imperfecta Rough",20),
                fg = "white", width = 19, borderwidth = 3, relief = "groove",
@@ -659,6 +700,7 @@ dificil.place(x=400 , y=450)
 dificil.config(background = color1)
 dificil.place_forget()
 
+#boton para volver al menu principal
 menu_principalS = Button(ventana, text = "Salir al menu principal", font = (6),
                     fg = "white", width = 17, borderwidth = 2, relief = "groove",
                     command = alPrincipal)
@@ -666,13 +708,16 @@ menu_principalS.place(x=1000 , y=580)
 menu_principalS.config(background = color1)
 menu_principalS.place_forget()
 
+#boton para inicializar los barcos visualmente y el juego
 iniciarbarcos = Button(ventana, text="Dibujar barcos e iniciar juego", font = (6),
-                       fg = "white", width = 17, borderwidth = 2, relief = "groove",
+                       fg = "white", width = 17,height = 2, borderwidth = 2, relief = "groove",
                        command = inicializar_barcos)
 iniciarbarcos.place(x = 1 , y = 1)
 iniciarbarcos.config(background = color1)
 iniciarbarcos.place_forget()
 
+
+#boton para cargar los barcos desde un archivo externo
 cargar_barcos = Button(ventana, text="cargar barcos", font = (6),
                        fg = "white", width = 17, borderwidth = 2, relief = "groove",
                        command = cargar_tablero)
@@ -680,6 +725,8 @@ cargar_barcos.place(x = 1 , y = 1)
 cargar_barcos.config(background = color1)
 cargar_barcos.place_forget()
 
+
+#boton para guardar los barcos en un archivo externo
 guardar_barcos = Button(ventana, text="guardar barcos", font = (6),
                        fg = "white", width = 17, borderwidth = 2, relief = "groove",
                        command = guardar_tablero)
@@ -687,7 +734,7 @@ guardar_barcos.place(x = 1 , y = 1)
 guardar_barcos.config(background = color1)
 guardar_barcos.place_forget()
 
-
+#boton para volver a la fase de preparacion
 reiniciar = Button(ventana, text="Reiniciar", font = (6),
                        fg = "white", width = 17, borderwidth = 2, relief = "groove",
                        command = reiniciar)
